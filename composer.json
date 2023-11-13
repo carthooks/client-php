@@ -1,0 +1,22 @@
+{
+    "name": "carthooks/carthooks",
+    "description": "A library used to access Carthooks.",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Carthooks\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "carthooks",
+            "email": "developer@carthooks.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "php": ">=5.5.0",
+        "guzzlehttp/guzzle": "^7.2"
+    }
+}
