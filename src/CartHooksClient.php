@@ -134,9 +134,15 @@ class CartHooksClient
         switch($token['mode']){
             case 'aliyun-oss':
                 $uploader = new AliyunOssUploader($token['token_data']);
-                return $uploader->upload($file);
+                return [
+                    'upload_id' => $token['id'],
+                    'filename' => $uploader->upload($file),
+                ];
             default:
-                return $this->local_upload($token, $file);
+                return [
+                    'upload_id' => $token['id'],
+                    'filename' => $this->local_upload($token, $file),
+                ];
         }
     }
 }

@@ -91,12 +91,12 @@ class AliyunOssUploader{
         fclose($file_content);  
 
         if (curl_errno($ch)) {
-            return curl_error($ch);
+            throw new \Exception(curl_error($ch));
         } else {
             $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             curl_close($ch);
             if($http_code == 200){
-                return $this->host.'/'.$this->dir_prefix.$file_name;
+                return $file_name;
             }
         }
     }
