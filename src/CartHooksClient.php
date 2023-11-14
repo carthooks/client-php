@@ -3,6 +3,7 @@
 namespace CartHooks;
 
 use GuzzleHttp\Client;
+use Carthooks\AliyunOssUploader;
 
 class CartHooksClient
 {
@@ -10,12 +11,14 @@ class CartHooksClient
     private $apiKey;
     private $apiSecret;
     private $headers;
+    private $timeout = -2;
+    private $uploadTimeout = -1;
 
     public function __construct($apiKey, $apiSecret)
     {
         $this->client = new Client([
             'base_uri' => 'https://api.carthooks.com/',
-            'timeout'  => 2.0,
+            'timeout'  => $this->timeout,
         ]);
 
         $this->apiKey = $apiKey;
@@ -30,7 +33,7 @@ class CartHooksClient
     {
         $this->client = new Client([
             'base_uri' => $baseUrl,
-            'timeout'  => 2.0,
+            'timeout'  => $this->timeout,
         ]);
         return $this;
     }
@@ -79,7 +82,7 @@ class CartHooksClient
 
     public function getItemById($appId, $collectionId, $itemId, array $fields = [])
     {
-        $response = $this->client->request('GET', "apps/{$appId}/collections/{$collectionId}/items/{$itemId}", [
+        $response = $this->client->request('GET', "v1/apps/{$appId}/collections/{$collectionId}/items/{$itemId}", [
             'headers' => $this->headers,
             'query' => [
                 'fields' => $fields,
@@ -91,7 +94,7 @@ class CartHooksClient
 
     public function createItem($appId, $collectionId, array $data)
     {
-        $response = $this->client->request('POST', "apps/{$appId}/collections/{$collectionId}/items", [
+        $response = $this->client->request('POST', "v1/apps/{$appId}/collections/{$collectionId}/items", [
             'headers' => $this->headers,
             'json' => ['data' => $data],
         ]);
@@ -101,7 +104,7 @@ class CartHooksClient
 
     public function updateItem($appId, $collectionId, $itemId, array $data)
     {
-        $response = $this->client->request('PUT', "apps/{$appId}/collections/{$collectionId}/items/{$itemId}", [
+        $response = $this->client->request('PUT', "v1/apps/{$appId}/collections/{$collectionId}/items/{$itemId}", [
             'headers' => $this->headers,
             'json' => ['data' => $data],
         ]);
@@ -111,7 +114,7 @@ class CartHooksClient
 
     public function deleteItem($appId, $collectionId, $itemId)
     {
-        $response = $this->client->request('DELETE', "apps/{$appId}/collections/{$collectionId}/items/{$itemId}", [
+        $response = $this->client->request('DELETE', "v1/apps/{$appId}/collections/{$collectionId}/items/{$itemId}", [
             'headers' => $this->headers,
         ]);
 
@@ -119,10 +122,21 @@ class CartHooksClient
     }
 
     public function getUploadToken(){
-        $response = $this->client->request('GET', "/uploads/token", [
+        $response = $this->client->request('POST', "v1/uploads/token", [
             'headers' => $this->headers,
         ]);
 
-        return json_decode($response->getBody()->getContents(), true);
+        $rsp = json_decode($response->getBody()->getContents(), true);
+        return $rsp['data'];
+    }
+
+    public function upload($token, $file){
+        switch($token['mode']){
+            case 'aliyun-oss':
+                $uploader = new AliyunOssUploader($token['token_data']);
+                return $uploader->upload($file);
+            default:
+                return $this->local_upload($token, $file);
+        }
     }
 }

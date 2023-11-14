@@ -48,3 +48,15 @@ $client = new CartHooksClient($api_key, $api_secret);
         'age' => 16,
     ]);
 ```
+
+### Upload assets
+```php
+    $token = $client->getUploadToken(); //auto expire after 30 minutes
+    $tempAsset = $client->upload($token, $_FILES['myFile']['tmp_name']); //will auto delete after 30 minutes, if not bind to item
+
+    $item = $client->updateItem($app_id, $collection_id, $item_id, [
+        'name' => 'test',
+        'age' => 16,
+        'photo' => $tempAsset, //bind assets
+    ]);
+```
