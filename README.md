@@ -60,3 +60,57 @@ $client = new CartHooksClient($api_key, $api_secret);
         'photo' => $tempAsset, //bind assets
     ]);
 ```
+
+### Upload use frontend
+```php
+Route::get('/upload-token', function () {
+    $client = new CartHooksClient($api_key, $api_secret);
+    $token = $client->getUploadToken();
+    return $token;
+});
+```
+
+```
+npm i carthooks-upload
+```
+
+```html
+<template>
+    <el-upload
+        action=""
+        :http-request="uploadFunction"
+        :before-upload="beforeUpload"
+        name="file">
+        <el-button size="small">upload</el-button>
+    </el-upload>
+</template>
+<script>
+import axios from 'axios';
+import upload from 'carthooks-upload'
+export default {
+    data() {
+        return {
+            limit: 1,
+            token: null,
+        }
+    },
+    methods: {
+        uploadFunction(item) {
+            upload(this.token, item.file, {
+                onProgress: (p) => {
+                    item.onProgress({ percent: Math.floor(p * 100) });
+                }
+            }).then((res) => {
+                this.$message.success('upload success')
+            }).catch((e) => {
+                this.$message.error('upload error')
+            })
+        },
+        async beforeUpload(file) {
+            await axios.get('/upload-token').then(res => {
+                this.token = res.data;
+            })
+        },
+    }
+}
+</script>
