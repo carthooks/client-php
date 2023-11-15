@@ -134,15 +134,31 @@ class CartHooksClient
         switch($token['mode']){
             case 'aliyun-oss':
                 $uploader = new AliyunOssUploader($token['token_data']);
-                return [
-                    'upload_id' => $token['id'],
-                    'filename' => $uploader->upload($file),
-                ];
+                return new UploadResult($token['id'], $uploader->upload($file));
             default:
-                return [
-                    'upload_id' => $token['id'],
-                    'filename' => $this->local_upload($token, $file),
-                ];
+                throw new Exception("Unsupported upload mode: {$token['mode']}");
         }
+    }
+
+    public function uploadPreview(UploadResult $result){
+        $response = $this->client->request('GET', "v1/uploads/preview", [
+            'headers' => $this->headers,
+            'query' => [
+                'upload_id' => $result->upload_id,
+                'file' => $result->file,
+            ],
+        ]);
+
+        return json_decode($response->getBody()->getContents(), true);
+    }
+}
+
+class UploadResult{
+    public $upload_id;
+    public $file;
+
+    function __construct($upload_id, $file){
+        $this->upload_id = $upload_id;
+        $this->file = $file;
     }
 }
