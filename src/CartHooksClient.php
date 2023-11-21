@@ -92,6 +92,15 @@ class CartHooksClient
         return json_decode($response->getBody()->getContents(), true);
     }
 
+    public function getSubmissionToken($appId, $collectionId, array $initialFormValues = []){
+        $response = $this->client->request('POST', "v1/apps/{$appId}/collections/{$collectionId}/submission-token", [
+            'headers' => $this->headers,
+            'json' => ['initial_form_values' => $initialFormValues],
+        ]);
+
+        return json_decode($response->getBody()->getContents(), true);
+    }
+
     public function createItem($appId, $collectionId, array $data)
     {
         $response = $this->client->request('POST', "v1/apps/{$appId}/collections/{$collectionId}/items", [
