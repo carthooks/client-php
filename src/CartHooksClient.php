@@ -92,10 +92,10 @@ class CartHooksClient
         return json_decode($response->getBody()->getContents(), true);
     }
 
-    public function getSubmissionToken($appId, $collectionId, array $initialFormValues = []){
+    public function getSubmissionToken($appId, $collectionId, array $options = []){
         $response = $this->client->request('POST', "v1/apps/{$appId}/collections/{$collectionId}/submission-token", [
             'headers' => $this->headers,
-            'json' => ['initial_form_values' => $initialFormValues],
+            \GuzzleHttp\RequestOptions::JSON => $options,
         ]);
 
         return json_decode($response->getBody()->getContents(), true);
